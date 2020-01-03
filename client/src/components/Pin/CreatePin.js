@@ -1,15 +1,85 @@
-import React from "react";
+import React, {useState, useContext} from "react";
 import { withStyles } from "@material-ui/core/styles";
-// import TextField from "@material-ui/core/TextField";
-// import Typography from "@material-ui/core/Typography";
-// import Button from "@material-ui/core/Button";
-// import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
-// import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
-// import ClearIcon from "@material-ui/icons/Clear";
-// import SaveIcon from "@material-ui/icons/SaveTwoTone";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
+import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
+import ClearIcon from "@material-ui/icons/Clear";
+import SaveIcon from "@material-ui/icons/SaveTwoTone";
+import Content from '../../context';
+import axios from 'axios';
+import { CREATE_PIN_MUTATION } from '../../graphql/mutations'
+import { GraphQLClient } from 'graphql-request';
 
 const CreatePin = ({ classes }) => {
-  return <div>CreatePin</div>;
+  const { state, dispatch } = useContext(Content);
+  const [title, setTitle] = useState("")
+  const [image, setImage] = useState("")
+  const [content, setContent] = useState("")
+  const [isSubmitting, setSubmitting] = useState(false)
+  const handleDeleteDraft = (event) => {
+    setTitle("")
+    setImage("")
+    setContent("")
+    dispatch({type: "DELETE_DRAFT"})
+  }
+  const handleSubmit = async (event) => {
+    try {
+      event.preventDefault();
+      setSubmitting(true)
+      // const url = await handleUpload();
+      const idToken = window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+      const clinet = new GraphQLClient('http://localhost:4000/graphql', {
+        headers: {authorization: idToken}
+      })
+      const { latitude, longitude } = state.draft;
+      const variables = { title, image: 'http://', content, longitude, latitude}
+      const { createPin } = await clinet.request(CREATE_PIN_MUTATION, variables)
+      console.log("Pin Created" , createPin);
+      handleDeleteDraft()
+    }catch(err) {
+      setSubmitting(false);
+      console.log(err);
+    }
+  }
+  const handleUpload = async () => {
+    const data = new FormData();
+    data.append("file", image);
+    data.append("upload_preset", "geopins");
+    data.append("cloud_name", "davidkhan");
+    const res = await axios.post("https://api.cloudinary.com/v1_1/davidkhan/image/upload", data);
+    return res.data.url
+  }
+  return (
+    <form className={classes.form}>
+      <Typography className={classes.alignCenter} component="h2" variant="h4" color="secondary">
+        <LandscapeIcon className={classes.iconLarge}/> Pin Location
+      </Typography>
+      <div>
+        <TextField onChange={e => setTitle(e.target.value)} name="title" label="Title" placeholder="Insert pin title" />
+        <input onChange={e => setImage(e.target.files[0])} accept="image/*" type="file" id="image" className={classes.input}/>
+        <label htmlFor="image">
+          <Button style={{color: image && "green"}} component="span" size="small" className={classes.button} >
+            <AddAPhotoIcon />
+          </Button>
+        </label>
+      </div>
+      <div className={classes.contentField}>
+        <TextField onChange={e => setContent(e.target.value)} name="content" label="Content" multiline rows="6" margin="normal" fullWidth variant="outlined"></TextField>
+      </div>
+      <div>
+        <Button onClick={handleDeleteDraft} className={classes.button} variant="contained" color="primary" >
+          <ClearIcon className={classes.leftIcon} />
+          Discard
+        </Button>
+        <Button onClick={handleSubmit} disabled={!content.trim() || !image || !title.trim() || isSubmitting} className={classes.button} variant="contained" color="secondary" type ="submit">
+          Submit
+          <SaveIcon className={classes.rightIcon} />
+        </Button>
+      </div>
+    </form>
+  );
 };
 
 const styles = theme => ({
