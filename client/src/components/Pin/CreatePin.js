@@ -10,9 +10,10 @@ import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Content from '../../context';
 import axios from 'axios';
 import { CREATE_PIN_MUTATION } from '../../graphql/mutations'
-import { GraphQLClient } from 'graphql-request';
+import { useClient } from '../../client';
 
 const CreatePin = ({ classes }) => {
+  const client = useClient();
   const { state, dispatch } = useContext(Content);
   const [title, setTitle] = useState("")
   const [image, setImage] = useState("")
@@ -29,16 +30,13 @@ const CreatePin = ({ classes }) => {
       event.preventDefault();
       setSubmitting(true)
       // const url = await handleUpload();
-      const idToken = window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-      const clinet = new GraphQLClient('http://localhost:4000/graphql', {
-        headers: {authorization: idToken}
-      })
       const { latitude, longitude } = state.draft;
       const variables = { title, image: 'http://', content, longitude, latitude}
-      const { createPin } = await clinet.request(CREATE_PIN_MUTATION, variables)
+      const { createPin } = await client.request(CREATE_PIN_MUTATION, variables)
       console.log("Pin Created" , createPin);
+      dispatch({type: "CREATE_PIN", payload: createPin})
       handleDeleteDraft()
-    }catch(err) {
+    }catch(err) { 
       setSubmitting(false);
       console.log(err);
     }
