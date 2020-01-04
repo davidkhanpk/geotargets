@@ -9,6 +9,7 @@ import Context from '../context';
 import Blog from './Blog';
 import { useClient } from '../client';
 import { GET_PINS_QUERY } from '../graphql/queries';
+import differenceInMinutes from 'date-fns/difference_in_minutes'; 
 
 const INITAIL_VIEWPORT = {
   latitude: 37.7577,
@@ -53,6 +54,10 @@ const Map = ({ classes }) => {
       })
     }
   }
+  const highlightNewPin = (pin) => {
+    const isNewPin = differenceInMinutes(Date.now(), Number(pin.createdAt)) <= 30
+    return isNewPin ? "limegreen" : "darkblue"
+  }
   return (<div className={classes.root}>
       <ReactMapGL onClick={handleMapClick} onViewStateChange={viewport => setViewport(viewport)} {...viewport } width="100vw" height="calc(100vh - 64px)" mapStyle="mapbox://styles/mapbox/streets-v9"vie mapboxApiAccessToken="pk.eyJ1IjoiZGF2aWRraGFucGsiLCJhIjoiY2s0cTFmOW95MGp3ZDNlbGFlNzVmYXBmZiJ9.0NIim75_HSm1cwZo9PHPHw" >
         <div className={classes.navigationControl}>
@@ -70,7 +75,7 @@ const Map = ({ classes }) => {
         )}
         {state.pins.map(pin => (
           <Marker key={pin._id} latitude={pin.latitude} longitude={pin.longitude} offsetTop={-37} offsetLeft={-19}>
-            <PinIcon size={40} color="darkblue"/>
+            <PinIcon size={40} color={highlightNewPin(pin)}/>
           </Marker>
         ))}
       </ReactMapGL>
