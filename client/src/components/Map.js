@@ -63,7 +63,7 @@ const Map = ({ classes }) => {
   const handleSelectPin = (pin) => {
     console.log("popup")
     setPopup(pin);
-    dispatch({type: "SET_PIN", payoad: pin})
+    dispatch({type: "SET_PIN", payload: pin})
   }
   const handleDeletePin = async (pin) => {
     const variables = {pinId: pin._id}
