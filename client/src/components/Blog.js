@@ -9,6 +9,7 @@ import PinContent from './Pin/PinContent'
 const Blog = ({ classes }) => {
   const { state } = useContext(Context);
   const { draft, currentPin } = state;
+  console.log(state);
   let BlogContent;
   if(!draft && !currentPin) {
     BlogContent = NoContent;

@@ -51,7 +51,7 @@ export default function reducer(state, {type, payload}) {
                 return {
                     ...state,
                     currentPin: payload,
-                    draftPin: null
+                    draft: null
                 }
             case "DELETE_PIN":
                 const deletedPin = payload
@@ -60,6 +60,16 @@ export default function reducer(state, {type, payload}) {
                     ...state,
                     pins: filteredPins,
                     currentPin: null
+                }
+            case "CREATE_COMMENT":
+                const updatedCurrentPin = payload
+                const updatedPins = state.pins.map(pin => 
+                    pin._id === updatedCurrentPin._id ? updatedCurrentPin : pin
+                )
+                return {
+                    ...state,
+                    pins: updatedPins,
+                    currentPin: updatedCurrentPin
                 }
         default:
                 return state

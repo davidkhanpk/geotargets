@@ -40,6 +40,7 @@ const Map = ({ classes }) => {
     if(!state.draft) {
       dispatch({type: "CREATE_DRAFT"})
     }
+    setPopup(null);
     const [longitude, latitude] = lngLat
     console.log(state.draft);
     dispatch({
@@ -61,8 +62,8 @@ const Map = ({ classes }) => {
     return isNewPin ? "limegreen" : "darkblue"
   }
   const handleSelectPin = (pin) => {
-    console.log("popup")
     setPopup(pin);
+    console.log(pin);
     dispatch({type: "SET_PIN", payload: pin})
   }
   const handleDeletePin = async (pin) => {
@@ -96,6 +97,9 @@ const Map = ({ classes }) => {
           <Popup anchor="top" latitude={popup.latitude} longitude={popup.longitude} closeOnClick={false} onClose={() => setPopup(null)}>
             <img className={classes.popupImage} src={popup.image} alt={popup.title} />
             <div className={classes.popupTab}>
+              <Typography>
+                {popup.title}
+              </Typography>
               <Typography>
                 {popup.latitude.toFixed(6)}, {popup.longitude.toFixed(6)}
               </Typography>
