@@ -11,26 +11,24 @@ const server = new ApolloServer({
     resolvers,
     subscriptions: {
         onConnect: (connectionParams, webSocket, context) => {
-            console.log("Connected")
+            console.log("WebSocket Connected")
         },
         onDisconnect: () => {
-            console.log("disconnected")
+            console.log("WebSocket Disconnected")
         }
     },
     context: async ({req, connection}) => {
         let authToken = null;
         let currentUser = null
         if (connection) {
-            // check connection for metadata
             return connection.context;
-          } 
-        //   console.log("Req --- ",req.body)
+        } 
         try {
             authToken = req.headers.authorization
             if(authToken) {
                 currentUser = await findOrCreateUser(authToken)
             }
-        }catch(err) {
+        } catch(err) {
             console.error("Unable", err)
         }
         return {currentUser}

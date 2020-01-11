@@ -11,8 +11,10 @@ import Content from '../../context';
 import axios from 'axios';
 import { CREATE_PIN_MUTATION } from '../../graphql/mutations'
 import { useClient } from '../../client';
+import { unstable_useMediaQuery as useMediaQuery } from '@material-ui/core/useMediaQuery';
 
 const CreatePin = ({ classes }) => {
+  const mobileSize = useMediaQuery("(max-width: 650px)")
   const client = useClient();
   const { state, dispatch } = useContext(Content);
   const [title, setTitle] = useState("")
@@ -49,7 +51,7 @@ const CreatePin = ({ classes }) => {
     return res.data.url
   }
   return (
-    <form className={classes.form}>
+    <form style={{marginTop: mobileSize ? "10px" : "0px"}} className={classes.form}>
       <Typography className={classes.alignCenter} component="h2" variant="h4" color="secondary">
         <LandscapeIcon className={classes.iconLarge}/> Pin Location
       </Typography>
@@ -63,7 +65,7 @@ const CreatePin = ({ classes }) => {
         </label>
       </div>
       <div className={classes.contentField}>
-        <TextField onChange={e => setContent(e.target.value)} name="content" label="Content" multiline rows="6" margin="normal" fullWidth variant="outlined"></TextField>
+        <TextField onChange={e => setContent(e.target.value)} name="content" label="Content" multiline rows={mobileSize ? "3" : "6"} margin="normal" fullWidth variant="outlined"></TextField>
       </div>
       <div>
         <Button onClick={handleDeleteDraft} className={classes.button} variant="contained" color="primary" >

@@ -13,6 +13,7 @@ import { DELETE_PIN_MUTATION } from '../graphql/mutations';
 import differenceInMinutes from 'date-fns/difference_in_minutes'; 
 import { Subscription } from 'react-apollo';
 import {PIN_ADDED_SUBSCRIPTION, PIN_DELETED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION} from '../graphql/subscriptions'
+import { unstable_useMediaQuery as useMediaQuery } from '@material-ui/core/useMediaQuery';
 
 const INITAIL_VIEWPORT = {
   latitude: 37.7577,
@@ -22,6 +23,7 @@ const INITAIL_VIEWPORT = {
 
 const Map = ({ classes }) => {
   const client = useClient();
+  const mobileSize = useMediaQuery("(max-width: 650px)")
   const {state, dispatch} = useContext(Context)
   const [viewport, setViewport] = useState(INITAIL_VIEWPORT);
   const [userPosition, setUserPostion] = useState(null)
@@ -44,7 +46,6 @@ const Map = ({ classes }) => {
     }
     setPopup(null);
     const [longitude, latitude] = lngLat
-    console.log(state.draft);
     dispatch({
       type: "UPDATE_DRAFT_LOCATION",
       payload: {longitude, latitude}
@@ -65,7 +66,6 @@ const Map = ({ classes }) => {
   }
   const handleSelectPin = (pin) => {
     setPopup(pin);
-    console.log(pin);
     dispatch({type: "SET_PIN", payload: pin})
   }
   const handleDeletePin = async (pin) => {
@@ -74,8 +74,8 @@ const Map = ({ classes }) => {
     setPopup(null);
   }
   const isAuthUser = () => state.currentUser._id === popup.author._id
-  return (<div className={classes.root}>
-      <ReactMapGL onClick={handleMapClick} onViewStateChange={viewport => setViewport(viewport)} {...viewport } width="100vw" height="calc(100vh - 64px)" mapStyle="mapbox://styles/mapbox/streets-v9"vie mapboxApiAccessToken="pk.eyJ1IjoiZGF2aWRraGFucGsiLCJhIjoiY2s0cTFmOW95MGp3ZDNlbGFlNzVmYXBmZiJ9.0NIim75_HSm1cwZo9PHPHw" >
+  return (<div className={mobileSize ? classes.rootMobile : classes.root}>
+      <ReactMapGL scrollZoom={!mobileSize} onClick={handleMapClick} onViewStateChange={viewport => setViewport(viewport)} {...viewport } width="100vw" height="calc(100vh - 64px)" mapStyle="mapbox://styles/mapbox/streets-v9"vie mapboxApiAccessToken="pk.eyJ1IjoiZGF2aWRraGFucGsiLCJhIjoiY2s0cTFmOW95MGp3ZDNlbGFlNzVmYXBmZiJ9.0NIim75_HSm1cwZo9PHPHw" >
         <div className={classes.navigationControl}>
           <NavigationControl onViewStateChange={viewport => setViewport(viewport)}/>
         </div>
@@ -119,7 +119,6 @@ const Map = ({ classes }) => {
       }} />
       <Subscription subscription={PIN_UPDATED_SUBSCRIPTION} onSubscriptionData={({ subscriptionData }) => {
         const { pinUpdated} = subscriptionData.data
-        console.log(pinUpdated)
         dispatch({type: "CREATE_COMMENT", payload: pinUpdated})
       }} />
       <Subscription subscription={PIN_DELETED_SUBSCRIPTION} onSubscriptionData={({ subscriptionData }) => {

@@ -15,7 +15,6 @@ const CreateComment = ({ classes }) => {
   const [comment, setComment] = useState("");
   const handleSubmitComment = async () => {
     const variables = {pinId: state.currentPin._id, text: comment }
-    console.log(variables)
     await client.request(CREATE_COMMENT_MUTATION, variables)
     setComment("")
   }
