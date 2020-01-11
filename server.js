@@ -9,9 +9,22 @@ const resolvers = require("./resolvers");
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({req}) => {
+    subscriptions: {
+        onConnect: (connectionParams, webSocket, context) => {
+            console.log("Connected")
+        },
+        onDisconnect: () => {
+            console.log("disconnected")
+        }
+    },
+    context: async ({req, connection}) => {
         let authToken = null;
         let currentUser = null
+        if (connection) {
+            // check connection for metadata
+            return connection.context;
+          } 
+        //   console.log("Req --- ",req.body)
         try {
             authToken = req.headers.authorization
             if(authToken) {
