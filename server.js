@@ -1,7 +1,11 @@
-const { ApolloServer } = require("apollo-server");
+// const { ApolloServer } = require("apollo-server");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const { findOrCreateUser } = require("./controllers/userController");
+const express = require('express');
+const { ApolloServer } = require('apollo-server-express');
+const PORT = process.env.PORT || 4000;
+const http = require("http")
 
 const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
@@ -35,10 +39,14 @@ const server = new ApolloServer({
     }
 })
 
+const app = express();
+server.applyMiddleware({ app });
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
 mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true}).then(() => {
     console.log("DB Connected")
 }).catch(err => console.log(err))
 
-server.listen().then(({url}) => {
-    console.log(`Server ${url}`)
+httpServer.listen(PORT, () => {
+    console.log(server.graphqlPath)
 })
